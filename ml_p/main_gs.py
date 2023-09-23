@@ -3,10 +3,10 @@ from mlp_keras import MLP
 import tensorflow as tf
 import pandas as pd
 
-folder = './report/ND/p1'
+folder = './report/ND/h2'
 file = '/data_norm.csv'
 
-BINARY = False
+BINARY = True
 
 losses = None
 if BINARY:

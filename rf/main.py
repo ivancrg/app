@@ -9,7 +9,7 @@ import display_data as dd
 
 plt.rcParams.update({'font.size': 14})
 
-folder = './report/ND/p2'
+folder = './report/ND/h2'
 file = '/data.csv'
 
 data = pd.read_csv(folder + file)

@@ -3,7 +3,7 @@ from mlp_keras import MLP
 import tensorflow as tf
 import pandas as pd
 
-PREDICTING_INTEREST = '/postop_binary'
+PREDICTING_INTEREST = '/DBC'
 
 OPTIMIZER = 'SGD'
 LEARNING_RATE = 0.1
@@ -25,8 +25,6 @@ rlr_callback = tf.keras.callbacks.ReduceLROnPlateau(
     monitor='val_loss', factor=0.2, patience=5, min_lr=0.0000001)
 
 mlp.cv(
-    9,
-    2 if BINARY else 3,
     optimizer_text=OPTIMIZER,
     learning_rate=LEARNING_RATE,
     callbacks=[early_stopping_callback, rlr_callback],
@@ -37,8 +35,6 @@ mlp.cv(
 )
 
 mlp.train(
-    9,
-    2 if BINARY else 3,
     optimizer_text=OPTIMIZER,
     learning_rate=0.1,
     callbacks=[early_stopping_callback, rlr_callback],

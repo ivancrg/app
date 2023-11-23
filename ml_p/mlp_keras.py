@@ -119,7 +119,9 @@ class MLP():
 
         return df
 
-    def cv(self, input_features, outputs, optimizer_text='Adam', learning_rate=0.001, callbacks=[], input_layer=512, hidden_layers=[512, 256, 128], dropout=0.2, visualization_save_folder=None, oversampling=False, loss='categorical_crossentropy'):
+    def cv(self, optimizer_text='Adam', learning_rate=0.001, callbacks=[], input_layer=512, hidden_layers=[512, 256, 128], dropout=0.2, visualization_save_folder=None, oversampling=False, loss='categorical_crossentropy'):
+        input_features = len(self.X.columns)
+        outputs = self.y.nunique()
         n_splits = 5
         skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
@@ -217,6 +219,8 @@ class MLP():
         plt.savefig(location)
 
     def train(self, input_features, outputs, optimizer_text='Adam', learning_rate=0.001, callbacks=[], input_layer=512, hidden_layers=[512, 256, 128], dropout=0.2, save_folder=None, test=False, oversampling=False, loss='categorical_crossentropy'):
+        input_features = len(self.X.columns)
+        outputs = self.y.nunique()
         X_train, X_valid, y_train, y_valid = train_test_split(
             self.X_train, self.y_train, stratify=self.y_train, test_size=0.2, random_state=42, shuffle=True)
         

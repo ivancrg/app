@@ -1,5 +1,0 @@
-max_leaf_nodes: 10
-max_features: 11
-max_depth: 6
-min_samples_split: 8
-min_samples_leaf: 1

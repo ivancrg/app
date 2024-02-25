@@ -16,9 +16,9 @@ class MLPCV():
             'sparse_categorical_crossentropy', 'categorical_crossentropy']
         optimizers = ['Adam',
                       'SGD',
-                      'AdamW',
-                      'Adafactor',
-                      'Nadam'
+                      # 'AdamW',
+                      # 'Adafactor',
+                      # 'Nadam'
                       ]
         learning_rates = [10 ** (-i) for i in range(1, 6)]
         dropouts = np.linspace(0.05, 0.2, 4)
@@ -68,4 +68,23 @@ class MLPCV():
                         print(
                             f'Progress: {i}/{len(losses) * len(optimizers) * len(learning_rates) * len(dropouts)} ({round(i / (len(losses) * len(optimizers) * len(learning_rates) * len(dropouts)) * 100, 2)}%)')
 
-        log.to_csv(f'{self.folder}/nn_gs_log.csv', index=False)
+        log.to_csv(f'{self.folder}/tmp_nn_gs_log.csv', index=False)
+
+        log.sort_values(by=['average_val_accuracy',
+                        'average_val_loss'], ascending=False)
+        best_params = bp = log.iloc[0]['name'].split('_')
+        bp_loss = bp[-5] + '_' + bp[-4] + '_' + \
+            bp[-3] if bp[-5] == 'sparse' else bp[-4] + '_' + bp[-3]
+        bp_opt, bp_lr, bp_inl, bp_hidl, bp_dp = str(bp[3]), float(bp[-2]), int(bp[0]), [int(i) for i in bp[1][1:-1].split(', ')], float(bp[2])
+
+        mlp.train(
+            optimizer_text=bp_opt,
+            learning_rate=bp_lr,
+            callbacks=[early_stopping_callback, rlr_callback],
+            input_layer=bp_inl,
+            hidden_layers=bp_hidl,
+            dropout=bp_dp,
+            save_folder=self.folder,
+            test=True,
+            loss=bp_loss
+        )

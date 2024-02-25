@@ -96,16 +96,22 @@ class SeqCovCV():
                             if mean_acc > best_mean_acc:
                                 best_mean_acc, best_kf_scores, best_params = mean_acc, kf_scores, cur_gs_params
 
-        dd.visualize_cv(self.k, kf_scores, self.folder, f'seqcov_best_')
+        dd.visualize_cv(self.k, best_kf_scores, self.folder, f'seqcov_best_')
         with open(self.folder + f'/seqcov_best_params.txt', 'w') as file:
             for key, value in best_params.items():
                 file.write(f'{key}: {value}\n')
 
         # TEST
-        sc = SequentialCovering(train_valid_data, multiclass=self.multiclass,
-                                max_depth=7, min_samples_leaf=2, output_name=self.prediction_label)
+        sc = SequentialCovering(train_valid_data,
+                                multiclass=self.multiclass,
+                                max_depth=best_params['max_depth'],
+                                min_samples_split=best_params['min_samples_split'],
+                                min_samples_leaf=best_params['min_samples_leaf'],
+                                max_features=best_params['max_features'],
+                                max_leaf_nodes=best_params['max_leaf_nodes'],
+                                output_name=self.prediction_label)
         sc.fit()
-
+        
         print("Learned Rules:")
         sc.print_rules_preds()
 

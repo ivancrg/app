@@ -94,7 +94,7 @@ class MLP():
     def get_name(self):
         return f'{self.input_layer}_{self.hidden_layers}_{self.dropout}_{self.optimizer_text}_{self.loss}_{self.learning_rate}'
 
-    def create_model(self, n_input_features, output_classes, input_layer, hidden_layers, dropout, not_categorical=False):
+    def create_model(self, n_input_features, output_classes, input_layer, hidden_layers, dropout, non_cat=False):
         model = Sequential()
         model.add(Dense(input_layer, input_shape=(
             n_input_features,), activation="relu"))
@@ -103,10 +103,10 @@ class MLP():
             model.add(Dense(neurons, activation="relu"))
             model.add(Dropout(dropout))
 
-        model.add(Dense(output_classes, activation="softmax"))
-
-        if not_categorical:
-            model.add(Dense(1, activation="softmax"))
+        if non_cat:
+            model.add(Dense(1, activation="sigmoid"))
+        else:
+            model.add(Dense(output_classes, activation="softmax"))
 
         return model
 
@@ -141,7 +141,7 @@ class MLP():
             X, y, stratify=y, test_size=0.2, random_state=42, shuffle=True)
 
         model = self.create_model(
-            n_input_features, n_outputs, self.input_layer, self.hidden_layers, self.dropout, not_categorical=(self.loss != 'categorical_crossentropy'))
+            n_input_features, n_outputs, self.input_layer, self.hidden_layers, self.dropout, non_cat=(self.loss != 'categorical_crossentropy'))
 
         model.compile(
             loss=self.loss,
@@ -155,6 +155,11 @@ class MLP():
             y_train = np.argmax(y_train, axis=1)
             y_valid = np.argmax(y_valid, axis=1)
 
+        # Binary to categorical output
+        if n_outputs <= 2 and self.loss == 'categorical_crossentropy':
+            y_train = tf.keras.utils.to_categorical(y_train, n_outputs)
+            y_valid = tf.keras.utils.to_categorical(y_valid, n_outputs)
+
         history = model.fit(
             X_train, y_train,
             validation_data=(X_valid, y_valid),
@@ -167,14 +172,14 @@ class MLP():
         self.classifier = model
         self.history = history
     
-    def fit_cv(self, X_train, y_train, X_valid, y_valid):
+    def fit_cv(self, X_train, y_train, X_valid, y_valid, fig_location=None, verbose=False):
         n_input_features = X_train.shape[1]
         n_outputs = len(np.unique(y_train))
 
         print(f'inputfeat {n_input_features}, nout {n_outputs}')
 
         model = self.create_model(
-            n_input_features, n_outputs, self.input_layer, self.hidden_layers, self.dropout, not_categorical=(self.loss != 'categorical_crossentropy'))
+            n_input_features, n_outputs, self.input_layer, self.hidden_layers, self.dropout, non_cat=(self.loss != 'categorical_crossentropy'))
 
         model.compile(
             loss=self.loss,
@@ -189,9 +194,13 @@ class MLP():
             y_valid = np.argmax(y_valid, axis=1)
             print('argmax')
 
-        model.summary()
-        print(y_train.shape)
-        print(y_valid.shape)
+        if verbose:
+            model.summary()
+
+        # Binary to categorical output
+        if n_outputs <= 2 and self.loss == 'categorical_crossentropy':
+            y_train = tf.keras.utils.to_categorical(y_train, n_outputs)
+            y_valid = tf.keras.utils.to_categorical(y_valid, n_outputs)
 
         history = model.fit(
             X_train, y_train,
@@ -199,7 +208,7 @@ class MLP():
             epochs=300,
             batch_size=16,
             callbacks=self.callbacks,
-            verbose=1
+            verbose=verbose
         )
 
         train_acc = history.history['accuracy'][np.argmax(
@@ -209,6 +218,11 @@ class MLP():
         val_acc = np.max(history.history['val_accuracy'])
         val_loss = history.history['val_loss'][np.argmax(
             history.history['val_accuracy'])]
+        
+        tf.keras.backend.clear_session()
+
+        if fig_location is not None:
+            self.plot_histories(history, fig_location)
         
         return (train_acc, train_loss, val_acc, val_loss)
 
@@ -224,6 +238,7 @@ class MLP():
     def predict(self, X, classes=True):
         if self.classifier is None:
             print("mlp.py::predict::No trained classifier!")
+            return
 
         y_pred = self.classifier.predict(X)
 
@@ -232,6 +247,7 @@ class MLP():
     def predict_proba(self, X, classes=True):
         if self.classifier is None:
             print("mlp.py::predict::No trained classifier!")
+            return
 
         y_pred = self.classifier.predict(X)
         return y_pred

@@ -61,7 +61,7 @@ class SequentialCoveringVC(BaseEstimator, ClassifierMixin):
 
     def fit(self, X, y):
         self.data = pd.concat([pd.DataFrame(X, columns=self.X_labels),
-                               pd.DataFrame(y, columns=self.y_labels)])
+                               pd.DataFrame(y, columns=self.y_labels)], axis=1)
 
         self.prediction_label = self.data.columns[-1]
 
@@ -74,11 +74,17 @@ class SequentialCoveringVC(BaseEstimator, ClassifierMixin):
             'min_samples_leaf': range(1, 12, 5)
         }
 
+        n_iter = np.prod([len(value) for value in param_grid.values()])
+        iter = 0
+
         for max_leaf_nodes in param_grid['max_leaf_nodes']:
             for max_features in param_grid['max_features']:
                 for max_depth in param_grid['max_depth']:
                     for min_samples_split in param_grid['min_samples_split']:
                         for min_samples_leaf in param_grid['min_samples_leaf']:
+                            iter += 1
+                            print(f'Sequential covering {iter}/{n_iter}')
+
                             cur_gs_params = {
                                 'max_leaf_nodes': max_leaf_nodes,
                                 'max_features': max_features,
@@ -88,8 +94,8 @@ class SequentialCoveringVC(BaseEstimator, ClassifierMixin):
                             }
 
                             mean_acc, kf_scores = self.cv(
-                                X=X.copy(),
-                                y=y.copy(),
+                                X=self.data.iloc[:, :-1],
+                                y=self.data.iloc[:, -1],
                                 params=cur_gs_params
                             )
 
@@ -108,8 +114,8 @@ class SequentialCoveringVC(BaseEstimator, ClassifierMixin):
         sc.fit()
         self.classifier = sc
 
-        dd.visualize_cv(self.k, best_kf_scores, self.save_folder, f'seqcov_best_')
-        with open(self.save_folder + f'/seqcov_best_params.txt', 'w') as file:
+        dd.visualize_cv(self.k, best_kf_scores, self.save_folder)
+        with open(self.save_folder + f'/grid_search_best.txt', 'w') as file:
             for key, value in best_params.items():
                 file.write(f'{key}: {value}\n')
 

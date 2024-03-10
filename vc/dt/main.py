@@ -31,14 +31,15 @@ class DecisionTreeVC(BaseEstimator, ClassifierMixin):
         }
 
         # Uses CV to evaluate each parameter combination
+        print('Decision tree GS running...')
         grid_search = GridSearchCV(estimator=dt_classifier,
-                                   param_grid=param_grid, cv=5)
+                                   param_grid=param_grid, cv=5, verbose=1)
         grid_search.fit(X, y)
         best_dt_classifier = grid_search.best_estimator_
 
         print("Best Estimator's Hyperparameters:", best_dt_classifier.get_params())
 
-        with open(self.save_folder + f'/dt_best_params.txt', 'w') as self.file:
+        with open(self.save_folder + f'/grid_search_best.txt', 'w') as self.file:
             for key, value in best_dt_classifier.get_params().items():
                 self.file.write(f'{key}: {value}\n')
 
@@ -48,7 +49,7 @@ class DecisionTreeVC(BaseEstimator, ClassifierMixin):
         print(
             f'Cross validation with best grid search hyperparameters: {np.mean(cv_scores)}')
         sc = {'test_score': cv_scores}
-        dd.visualize_cv(k, sc, self.save_folder, 'dt_gs_')
+        dd.visualize_cv(k, sc, self.save_folder)
 
         self.classifier = best_dt_classifier
 
@@ -58,7 +59,7 @@ class DecisionTreeVC(BaseEstimator, ClassifierMixin):
             return
 
         y_test_pred = self.classifier.predict(X)
-        dd.visualize_cr_cm(y, y_test_pred, self.folder, prefix='dt_gs_')
+        dd.visualize_cr_cm(y, y_test_pred, self.folder)
 
         plt.show()
 
@@ -82,7 +83,7 @@ class DecisionTreeVC(BaseEstimator, ClassifierMixin):
         plt.bar(X.columns, importance)
         plt.xticks(rotation=90)
         plt.ylabel('Importance')
-        plt.savefig(self.save_folder + '/dt_gs_fimp.png')
+        plt.savefig(self.save_folder + '/feature_importance.png')
 
     def predict(self, X):
         if self.classifier is None:

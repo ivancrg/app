@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import tensorflow as tf
-from mlp_keras import MLP
+from vc.ml_p.mlp import MLP
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
@@ -10,15 +10,12 @@ from sklearn.inspection import permutation_importance, PartialDependenceDisplay
 from PyALE import ale
 import shap
 
-NN_MODEL_NAME = '/nn_save_512_[512, 256, 128]_0.24_SGD_categorical_crossentropy_0.1'
+NN_MODEL_NAME = '../report_old/MGMT/nn_save_512_[512, 256, 128]_0.24_Adam_categorical_crossentropy_0.1'
 SAVE = True
 
 IS_MODEL_NN = True
-OVERSAMPLED_VERSION = False
-PREDICTION_INTERES = '/histology'
 
-BASE_FOLDER = './report/OS_NN' if OVERSAMPLED_VERSION else './report/NO_OS'
-FOLDER = BASE_FOLDER + PREDICTION_INTERES
+FOLDER = './report_test/expl'
 FILE = '/data.csv'
 FILE_NORM = '/data_norm.csv'
 RF_BEST_MODEL_FILE = '/rf_gs_best_params.txt'

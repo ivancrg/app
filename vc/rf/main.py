@@ -24,24 +24,25 @@ class RandomForestVC(BaseEstimator, ClassifierMixin):
         rf_classifier = RandomForestClassifier(random_state=42)
 
         param_grid = {
-            'n_estimators': [1, 2],  # range(25, 101, 25),
-            'max_leaf_nodes': [10, 11],  # range(10, 41, 10),
-            'max_features': [2, 3],  # range(2, 12, 3),
-            'max_depth': [6, 4],  # range(6, 11, 2),
-            'min_samples_split': [1, 2],  # range(1, 22, 10),
-            'min_samples_leaf': [1, 2],  # range(1, 12, 5)
+            'n_estimators': range(25, 101, 25),
+            'max_leaf_nodes': range(10, 41, 10),
+            'max_features': range(2, 12, 3),
+            'max_depth': range(6, 11, 2),
+            'min_samples_split': range(1, 22, 10),
+            'min_samples_leaf': range(1, 12, 5)
         }
 
         # Uses CV to evaluate each parameter combination
+        print("Random forest GS running...")
         grid_search = GridSearchCV(
-            estimator=rf_classifier, param_grid=param_grid, cv=5)
+            estimator=rf_classifier, param_grid=param_grid, cv=5, verbose=1)
         grid_search.fit(X, y)
         best_rf_classifier = grid_search.best_estimator_
 
         print("Best Estimator's Hyperparameters:",
               best_rf_classifier.get_params())
 
-        with open(self.save_folder + f'/rf_gs_best_params.txt', 'w') as self.file:
+        with open(self.save_folder + f'/grid_search_best.txt', 'w') as self.file:
             for key, value in best_rf_classifier.get_params().items():
                 self.file.write(f'{key}: {value}\n')
 
@@ -51,7 +52,7 @@ class RandomForestVC(BaseEstimator, ClassifierMixin):
         print(
             f'Cross validation with best grid search hyperparameters: {np.mean(cv_scores)}')
         sc = {'test_score': cv_scores}
-        dd.visualize_cv(k, sc, self.save_folder, 'rf_gs_')
+        dd.visualize_cv(k, sc, self.save_folder)
 
         self.classifier = best_rf_classifier
 
@@ -61,7 +62,7 @@ class RandomForestVC(BaseEstimator, ClassifierMixin):
             return
 
         y_test_pred = self.classifier.predict(X)
-        dd.visualize_cr_cm(y, y_test_pred, self.save_folder, 'rf_gs_')
+        dd.visualize_cr_cm(y, y_test_pred, self.save_folder)
 
         plt.show()
 
@@ -85,7 +86,7 @@ class RandomForestVC(BaseEstimator, ClassifierMixin):
         plt.bar(X.columns, importance)
         plt.xticks(rotation=90)
         plt.ylabel('Importance')
-        plt.savefig(self.save_folder + '/rf_gs_fimp.png')
+        plt.savefig(self.save_folder + '/feature_importance.png')
 
     def predict(self, X):
         if self.classifier is None:

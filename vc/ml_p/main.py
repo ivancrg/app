@@ -6,6 +6,14 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.base import BaseEstimator, ClassifierMixin
 from imblearn.over_sampling import SMOTE
 
+"""
+    Class that extends BaseEstimator and ClassifierMixin
+    in order to be available for using with voting classifier.
+
+    Implements artificial neural network algorithm trained
+    using grid-search and cross-validation.
+"""
+
 
 class MLPVC(BaseEstimator, ClassifierMixin):
     def __init__(self, save_folder=None, n_splits=5, binary=True, smote=False, verbose=False):
@@ -15,6 +23,12 @@ class MLPVC(BaseEstimator, ClassifierMixin):
         self.mlp = None
         self.smote = smote
         self.verbose = verbose
+
+    """
+        Function to fit the model using provided training data
+        in the defined grid-search space.
+        Grid-search with cross-validation.
+    """
 
     def fit(self, X, y):
         losses = ['categorical_crossentropy', 'binary_crossentropy'] if self.binary else [

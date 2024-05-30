@@ -1,13 +1,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
-from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
+from sklearn.model_selection import cross_val_score, GridSearchCV
 from sklearn.inspection import permutation_importance
 from sklearn.ensemble import RandomForestClassifier
 import display_data as dd
 from sklearn.base import BaseEstimator, ClassifierMixin
 
 plt.rcParams.update({'font.size': 14})
+
+"""
+    Class that extends BaseEstimator and ClassifierMixin
+    in order to be available for using with voting classifier.
+
+    Implements random forest algorithm trained using
+    grid-search and cross-validation.
+"""
 
 
 class RandomForestVC(BaseEstimator, ClassifierMixin):
@@ -16,7 +23,8 @@ class RandomForestVC(BaseEstimator, ClassifierMixin):
         self.save_folder = save_folder
 
     """
-        Function to fit the model using provided training data.
+        Function to fit the model using provided training data
+        and grid-search space.
         Grid-search with cross-validation.
     """
 
@@ -56,6 +64,10 @@ class RandomForestVC(BaseEstimator, ClassifierMixin):
 
         self.classifier = best_rf_classifier
 
+    """
+        Tests model on provided data.
+    """
+
     def test(self, X, y):
         if self.classifier is None:
             print(f'Classifier needs to be fitted first!')
@@ -87,6 +99,10 @@ class RandomForestVC(BaseEstimator, ClassifierMixin):
         plt.xticks(rotation=90)
         plt.ylabel('Importance')
         plt.savefig(self.save_folder + '/feature_importance.png')
+
+    """
+        Returns model prediction for provided instance.
+    """
 
     def predict(self, X):
         if self.classifier is None:

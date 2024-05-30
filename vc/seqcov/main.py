@@ -5,6 +5,13 @@ import numpy as np
 import display_data as dd
 from sklearn.base import BaseEstimator, ClassifierMixin
 
+"""
+    Class that extends BaseEstimator and ClassifierMixin
+    in order to be available for using with voting classifier.
+
+    Implements sequential covering algorithm trained using
+    grid-search and cross-validation.
+"""
 
 class SequentialCoveringVC(BaseEstimator, ClassifierMixin):
     def __init__(self, X_labels, y_labels, save_folder='.', multiclass=False, k=5):
@@ -17,6 +24,10 @@ class SequentialCoveringVC(BaseEstimator, ClassifierMixin):
         self.data = None
         self.classifier = None
 
+    """
+        Runs cross-validation for provided data and parameters.
+        Returns cross-validation scores.
+    """
     def cv(self, X, y, params):
         skf = StratifiedKFold(n_splits=self.k, shuffle=True, random_state=42)
         val_accuracies = []
@@ -55,7 +66,8 @@ class SequentialCoveringVC(BaseEstimator, ClassifierMixin):
         return (np.mean(kf_scores['test_score']), kf_scores)
 
     """
-        Function to fit the model using provided training data.
+        Function to fit the model using provided training data
+        and grid-search space.
         Grid-search with cross-validation.
     """
 
@@ -119,6 +131,9 @@ class SequentialCoveringVC(BaseEstimator, ClassifierMixin):
             for key, value in best_params.items():
                 file.write(f'{key}: {value}\n')
 
+    """
+        Returns model prediction for provided instance.
+    """
 
     def predict(self, X):
         X = pd.DataFrame(X, columns=self.X_labels)

@@ -14,6 +14,10 @@ from sklearn.model_selection import train_test_split
 
 plt.rcParams.update({'font.size': 14})
 
+"""
+    Class representing multi-layer perceptron.
+"""
+
 
 class MLP():
     def __init__(self, save_folder=None):
@@ -29,9 +33,9 @@ class MLP():
         self.classifier = None
         self.history = None
 
-        # # PDP sklearn things
-        # self._estimator_type = 'classifier'
-        # self.classes_ = data.iloc[:, -1].unique()
+    #     # PDP sklearn things
+    #     self._estimator_type = 'classifier'
+    #     self.classes_ = data.iloc[:, -1].unique()
 
     # # PDP sklearn thing
     # def fit(self, args):
@@ -91,8 +95,16 @@ class MLP():
 
         return optimizer
 
+    """
+        Gets name of the model based on its attributes.
+    """
+
     def get_name(self):
         return f'{self.input_layer}_{self.hidden_layers}_{self.dropout}_{self.optimizer_text}_{self.loss}_{self.learning_rate}'
+
+    """
+        Creates model based on given attributes.
+    """
 
     def create_model(self, n_input_features, output_classes, input_layer, hidden_layers, dropout, non_cat=False):
         model = Sequential()
@@ -133,6 +145,12 @@ class MLP():
         plt.tight_layout()
         plt.savefig(location)
 
+    """
+        Function to fit the model using provided training data
+        and grid-search space.
+        Grid-search with cross-validation.
+    """
+
     def fit(self, X, y):
         n_input_features = X.shape[1]
         n_outputs = len(np.unique(y))
@@ -171,12 +189,16 @@ class MLP():
 
         self.classifier = model
         self.history = history
-    
+
+    """
+        Function to fit the model using provided training data
+        separated to training and validation sets with grid-search space.
+        Grid-search with cross-validation.
+    """
+
     def fit_cv(self, X_train, y_train, X_valid, y_valid, fig_location=None, verbose=False):
         n_input_features = X_train.shape[1]
         n_outputs = len(np.unique(y_train))
-
-        print(f'inputfeat {n_input_features}, nout {n_outputs}')
 
         model = self.create_model(
             n_input_features, n_outputs, self.input_layer, self.hidden_layers, self.dropout, non_cat=(self.loss != 'categorical_crossentropy'))
@@ -218,13 +240,17 @@ class MLP():
         val_acc = np.max(history.history['val_accuracy'])
         val_loss = history.history['val_loss'][np.argmax(
             history.history['val_accuracy'])]
-        
+
         tf.keras.backend.clear_session()
 
         if fig_location is not None:
             self.plot_histories(history, fig_location)
-        
+
         return (train_acc, train_loss, val_acc, val_loss)
+    
+    """
+        Tests model on provided data.
+    """
 
     def test(self, X, y):
         if self.save_folder is not None:
@@ -235,6 +261,10 @@ class MLP():
             dd.visualize_cr_cm(np.argmax(y, axis=1), np.argmax(
                 y_pred, axis=1), self.save_folder, f'nn_{self.get_name()}')
 
+    """
+        Returns model prediction for provided instance.
+    """
+
     def predict(self, X, classes=True):
         if self.classifier is None:
             print("mlp.py::predict::No trained classifier!")
@@ -243,6 +273,10 @@ class MLP():
         y_pred = self.classifier.predict(X)
 
         return np.argmax(y_pred, axis=1)
+
+    """
+        Returns model prediction for provided instance in form of probability.
+    """
 
     def predict_proba(self, X, classes=True):
         if self.classifier is None:

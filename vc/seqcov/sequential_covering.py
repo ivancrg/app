@@ -1,7 +1,5 @@
 import pandas as pd
-from sklearn import tree
-from seqcov.learn_one_rule import LearnOneRule
-import matplotlib.pyplot as plt
+from vc.seqcov.learn_one_rule import LearnOneRule
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 

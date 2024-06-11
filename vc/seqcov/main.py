@@ -1,5 +1,5 @@
 import pandas as pd
-from seqcov.sequential_covering import SequentialCovering
+from vc.seqcov.sequential_covering import SequentialCovering
 from sklearn.model_selection import StratifiedKFold
 import numpy as np
 import display_data as dd

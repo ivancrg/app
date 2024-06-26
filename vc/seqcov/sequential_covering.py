@@ -9,13 +9,13 @@ class SequentialCovering(BaseEstimator, ClassifierMixin):
     def __init__(
             self,
             data,
+            output_name,
             multiclass=False,
             max_depth=None,
             min_samples_split=2,
             min_samples_leaf=1,
             max_features=None,
-            max_leaf_nodes=None,
-            output_name='Postoperative diagnosis'):
+            max_leaf_nodes=None):
         self.data_orig = data
         self.data_orig.reset_index(drop=True, inplace=True)
         self.multiclass = multiclass

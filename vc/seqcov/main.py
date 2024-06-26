@@ -13,6 +13,7 @@ from sklearn.base import BaseEstimator, ClassifierMixin
     grid-search and cross-validation.
 """
 
+
 class SequentialCoveringVC(BaseEstimator, ClassifierMixin):
     def __init__(self, X_labels, y_labels, save_folder='.', multiclass=False, k=5):
         self.save_folder = save_folder
@@ -23,12 +24,16 @@ class SequentialCoveringVC(BaseEstimator, ClassifierMixin):
         self.prediction_label = None
         self.data = None
         self.classifier = None
+        self.classes_ = None
 
     """
         Runs cross-validation for provided data and parameters.
         Returns cross-validation scores.
     """
+
     def cv(self, X, y, params):
+        self.classes_ = np.unique(y)
+
         skf = StratifiedKFold(n_splits=self.k, shuffle=True, random_state=42)
         val_accuracies = []
 
@@ -115,16 +120,19 @@ class SequentialCoveringVC(BaseEstimator, ClassifierMixin):
                                 best_mean_acc, best_kf_scores, best_params = mean_acc, kf_scores, cur_gs_params
 
         sc = SequentialCovering(
-                self.data.copy(),
-                multiclass=self.multiclass,
-                max_depth=best_params['max_depth'],
-                min_samples_split=best_params['min_samples_split'],
-                min_samples_leaf=best_params['min_samples_leaf'],
-                max_features=best_params['max_features'],
-                max_leaf_nodes=best_params['max_leaf_nodes'],
-                output_name=self.prediction_label)
+            self.data.copy(),
+            multiclass=self.multiclass,
+            max_depth=best_params['max_depth'],
+            min_samples_split=best_params['min_samples_split'],
+            min_samples_leaf=best_params['min_samples_leaf'],
+            max_features=best_params['max_features'],
+            max_leaf_nodes=best_params['max_leaf_nodes'],
+            output_name=self.prediction_label)
         sc.fit()
         self.classifier = sc
+
+        # Custom attribute to track if the estimator is fitted
+        self._is_fitted = True
 
         dd.visualize_cv(self.k, best_kf_scores, self.save_folder)
         with open(self.save_folder + f'/grid_search_best.txt', 'w') as file:
@@ -143,3 +151,10 @@ class SequentialCoveringVC(BaseEstimator, ClassifierMixin):
             return
 
         return self.classifier.predict(X).flatten()
+
+    """
+        Check fitted status and return a Boolean value.
+    """
+
+    def __sklearn_is_fitted__(self):
+        return hasattr(self, "_is_fitted") and self._is_fitted

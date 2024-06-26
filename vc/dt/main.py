@@ -21,6 +21,7 @@ class DecisionTreeVC(BaseEstimator, ClassifierMixin):
     def __init__(self, save_folder='.'):
         self.classifier = None
         self.save_folder = save_folder
+        self.classes_ = None
 
     """
         Function to fit the model using provided training data
@@ -29,6 +30,8 @@ class DecisionTreeVC(BaseEstimator, ClassifierMixin):
     """
 
     def fit(self, X, y):
+        self.classes_ = np.unique(y)
+
         dt_classifier = DecisionTreeClassifier(random_state=42)
 
         param_grid = {
@@ -108,4 +111,15 @@ class DecisionTreeVC(BaseEstimator, ClassifierMixin):
             print(f'Classifier needs to be fitted first!')
             return
 
-        return self.classifier.predict(X).flatten()
+        return self.classifier.predict(X)
+    
+    """
+        Returns model prediction probability for provided instance.
+    """
+
+    def predict_proba(self, X):
+        if self.classifier is None:
+            print(f'Classifier needs to be fitted first!')
+            return
+
+        return self.classifier.predict_proba(X)

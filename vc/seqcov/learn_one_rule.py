@@ -8,12 +8,12 @@ class LearnOneRule:
     def __init__(
             self,
             data,
+            output_name,
             max_depth=None,
             min_samples_split=2,
             min_samples_leaf=1,
             max_features=None,
             max_leaf_nodes=None,
-            output_name='Postoperative diagnosis',
             class_names=['0', '1']):
         self.data = data
         self.max_depth = max_depth

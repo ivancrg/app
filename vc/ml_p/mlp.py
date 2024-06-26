@@ -33,24 +33,20 @@ class MLP():
         self.classifier = None
         self.history = None
 
-    #     # PDP sklearn things
-    #     self._estimator_type = 'classifier'
-    #     self.classes_ = data.iloc[:, -1].unique()
+        # PDP sklearn things
+        self._estimator_type = 'classifier'
+        self.classes_ = None
 
-    # # PDP sklearn thing
-    # def fit(self, args):
-    #     self.train(args)
+    # PDP sklearn thing
+    def fit(self, args):
+        self.train(args)
 
-    # # PDP sklearn thing
-    # def __sklearn_is_fitted__(self):
-    #     return True
+    # PDP sklearn thing
+    def __sklearn_is_fitted__(self):
+        return True
 
-    # # PDP sklearn thing
-    # def predict_proba(self, X):
-    #     return self.predict(X, np_classes=False)
-
-    # def __call__(self, X):
-    #     return self.predict(X)
+    def __call__(self, X):
+        return self.predict(X)
 
     def set_params(self, params):
         for key, val in params.items():
@@ -152,6 +148,8 @@ class MLP():
     """
 
     def fit(self, X, y):
+        self.classes_ = np.unique(y)
+
         n_input_features = X.shape[1]
         n_outputs = len(np.unique(y))
 
@@ -187,16 +185,20 @@ class MLP():
             verbose=1
         )
 
-        self.classifier = model
         self.history = history
+        self.classifier = model
+
+        # Custom attribute to track if the estimator is fitted
+        self._is_fitted = True
 
     """
         Function to fit the model using provided training data
-        separated to training and validation sets with grid-search space.
-        Grid-search with cross-validation.
+        separated to training and validation set.
     """
 
     def fit_cv(self, X_train, y_train, X_valid, y_valid, fig_location=None, verbose=False):
+        self.classes_ = np.unique(np.union1d(y_train, y_valid))
+
         n_input_features = X_train.shape[1]
         n_outputs = len(np.unique(y_train))
 
@@ -247,7 +249,7 @@ class MLP():
             self.plot_histories(history, fig_location)
 
         return (train_acc, train_loss, val_acc, val_loss)
-    
+
     """
         Tests model on provided data.
     """
@@ -265,9 +267,9 @@ class MLP():
         Returns model prediction for provided instance.
     """
 
-    def predict(self, X, classes=True):
+    def predict(self, X):
         if self.classifier is None:
-            print("mlp.py::predict::No trained classifier!")
+            print("mlp.py::predict Classifier not fitted!")
             return
 
         y_pred = self.classifier.predict(X)
@@ -278,10 +280,9 @@ class MLP():
         Returns model prediction for provided instance in form of probability.
     """
 
-    def predict_proba(self, X, classes=True):
+    def predict_proba(self, X):
         if self.classifier is None:
-            print("mlp.py::predict::No trained classifier!")
+            print("mlp.py::predict_proba Classifier not fitted!")
             return
 
-        y_pred = self.classifier.predict(X)
-        return y_pred
+        return self.classifier.predict(X)

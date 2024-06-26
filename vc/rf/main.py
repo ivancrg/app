@@ -21,6 +21,23 @@ class RandomForestVC(BaseEstimator, ClassifierMixin):
     def __init__(self, save_folder='.'):
         self.classifier = None
         self.save_folder = save_folder
+        
+        # PDP sklearn requirements
+        self._estimator_type = 'classifier'
+        self.classes_ = None
+
+    # PDP sklearn thing
+    def __sklearn_is_fitted__(self):
+        return self.classifier is not None
+
+    # PDP sklearn thing
+    def predict_proba(self, X):
+        return self.predict(X)
+
+    # PDP sklearn thing
+    def __call__(self, X):
+        return self.predict(X)
+
 
     """
         Function to fit the model using provided training data
@@ -29,15 +46,24 @@ class RandomForestVC(BaseEstimator, ClassifierMixin):
     """
 
     def fit(self, X, y):
+        self.classes_ = np.unique(y)
         rf_classifier = RandomForestClassifier(random_state=42)
 
+        # param_grid = {
+        #     'n_estimators': range(25, 101, 25),
+        #     'max_leaf_nodes': range(10, 41, 10),
+        #     'max_features': range(2, 12, 3),
+        #     'max_depth': range(6, 11, 2),
+        #     'min_samples_split': range(1, 22, 10),
+        #     'min_samples_leaf': range(1, 12, 5)
+        # }
         param_grid = {
-            'n_estimators': range(25, 101, 25),
-            'max_leaf_nodes': range(10, 41, 10),
-            'max_features': range(2, 12, 3),
-            'max_depth': range(6, 11, 2),
-            'min_samples_split': range(1, 22, 10),
-            'min_samples_leaf': range(1, 12, 5)
+            'n_estimators': range(25, 101, 50),
+            'max_leaf_nodes': range(10, 41, 20),
+            'max_features': range(2, 12, 10),
+            'max_depth': range(6, 11, 5),
+            'min_samples_split': range(2, 22, 20),
+            'min_samples_leaf': range(1, 12, 10)
         }
 
         # Uses CV to evaluate each parameter combination

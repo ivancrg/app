@@ -20,7 +20,7 @@ class MLPVC(BaseEstimator, ClassifierMixin):
         self.save_folder = save_folder
         self.n_splits = n_splits
         self.binary = binary
-        self.mlp = None
+        self.classifier = None
         self.smote = smote
         self.verbose = verbose
 
@@ -34,13 +34,15 @@ class MLPVC(BaseEstimator, ClassifierMixin):
         losses = ['categorical_crossentropy', 'binary_crossentropy'] if self.binary else [
             'sparse_categorical_crossentropy', 'categorical_crossentropy']
         optimizers = ['Adam',
-                      'SGD',
-                      'AdamW',
+                        'SGD',
+                      # 'AdamW',
                       # 'Adafactor',
                       # 'Nadam'
                       ]
-        learning_rates = [10 ** (-i) for i in range(1, 6)]
-        dropouts = np.linspace(0.05, 0.2, 4)
+        learning_rates = [0.0001]
+        dropouts = [0.1]
+        # learning_rates = [10 ** (-i) for i in range(1, 6)]
+        # dropouts = np.linspace(0.05, 0.2, 4)
 
         print(self.save_folder)
         print(losses)
@@ -146,11 +148,4 @@ class MLPVC(BaseEstimator, ClassifierMixin):
                 fold['X_train_fold'], fold['y_train_fold'], fold['X_val_fold'], fold['y_val_fold'], f'{self.save_folder}/cv.png', verbose=True)
 
         mlp.fit(X, y)
-        self.mlp = mlp
-
-    def predict(self, X):
-        if self.mlp is None:
-            print(f'vc::ml_p::main_gs.py Classifier not fitted!')
-            return
-
-        return self.mlp.predict(X)
+        self.classifier = mlp
